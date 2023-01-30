@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using LukensUtils;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 
 public class BuilderManager : NetworkBehaviour
 {
@@ -45,7 +46,7 @@ public class BuilderManager : NetworkBehaviour
 
             NetworkObject newNetworkObj = newObj.GetComponent<NetworkObject>();
             
-            newNetworkObj.Spawn();
+            newNetworkObj.SpawnWithOwnership(id);
             spawned.Add(newNetworkObj.NetworkObjectId);
         }
 
@@ -161,6 +162,10 @@ public class BuilderManager : NetworkBehaviour
         newData._zRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.z;
         newData._wRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.w;
 
+        print(newData._xPos);
+        print(newData._yPos);
+        print(newData._zPos);
+
         SpawnWallServerRpc(OwnerClientId, newData);
 
     }
@@ -189,7 +194,10 @@ public class BuilderManager : NetworkBehaviour
         Vector3 newPos = new(posAndRotData._xPos, posAndRotData._yPos, posAndRotData._zPos);
         Quaternion newRot = new(posAndRotData._xRot, posAndRotData._yRot, posAndRotData._zRot, posAndRotData._wRot);
 
-        newWall.SetPositionAndRotation(newPos, newRot);
+        //newWall.SetPositionAndRotation(newPos, newRot);
+        NetworkTransform foundNetworkTransform = newWall.GetComponent<NetworkTransform>();
+
+        foundNetworkTransform.SetState(newPos, newRot);
     }
 
     
