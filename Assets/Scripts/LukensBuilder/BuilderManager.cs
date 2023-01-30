@@ -8,8 +8,8 @@ public class BuilderManager : NetworkBehaviour
 {
     public bool BuildModeOn;
 
-    public GhostController m_CurrentActiveBuildGhost;
-    public int m_CurrentGhost;
+    public NetworkObject m_CurrentActiveBuildGhost;
+    public int m_CurrentGhostInt;
     public List<NetworkObject> m_Ghosts;
     public List<Transform> m_GhostPrefabs;
 
@@ -17,6 +17,7 @@ public class BuilderManager : NetworkBehaviour
     [SerializeField] private Camera m_PlayerCam;
 
     [Header("Cache")]
+    [SerializeField] private Transform[] m_FinishedPrefabs;
     [SerializeField] private Transform m_Wall_Plank;
 
     public override void OnNetworkSpawn()
@@ -48,7 +49,7 @@ public class BuilderManager : NetworkBehaviour
             spawned.Add(newNetworkObj.NetworkObjectId);
         }
 
-        
+
         SaveSpawnedRefsClientRpc(spawned.ToArray(), id);
     }
 
@@ -56,7 +57,7 @@ public class BuilderManager : NetworkBehaviour
     public void SaveSpawnedRefsClientRpc(ulong[] spawnedObjects, ulong id)
     {
         print("Spawned Objects:");
-
+        m_Ghosts.Clear();
 
         foreach (var item in NetworkManager.Singleton.SpawnManager.SpawnedObjects)
         {
@@ -66,11 +67,18 @@ public class BuilderManager : NetworkBehaviour
         foreach (ulong item in spawnedObjects)
         {
             print(item);
-
-            NetworkObject foundObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[item];
-            print("found: " + foundObj.name);
+            try
+            {
+                NetworkObject foundObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[item];
+                m_Ghosts.Add(foundObj);
+            }
+            catch
+            {
+                Debug.LogError("yep");
+            }
         }
-        
+
+
         //List<NetworkObject> foundObjs = new();
         //print("Saving spawned refs");
         //foreach (ulong item in spawnedObjects)
@@ -106,7 +114,7 @@ public class BuilderManager : NetworkBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-            m_CurrentActiveBuildGhost.CmdToggleVisibilityServerRpc();
+            //toggle
         }
     }
 
@@ -118,18 +126,18 @@ public class BuilderManager : NetworkBehaviour
 
             GameObject foundObject = LukensUtilities.RaycastFromMouse(100, m_PlayerCam);
 
-            if (foundObject != null)
+            if (foundObject != null && m_Ghosts.Count > 0)
             {
                 // show ghost
                 //m_CurrentActiveBuildGhost.GetComponent<NetworkObject>().;
 
 
-                string[] ghostExpanded = m_CurrentActiveBuildGhost.name.Split('_');
+                string[] ghostExpanded = m_Ghosts[m_CurrentGhostInt].name.Split('_');
                 string[] foundExpanded = foundObject.name.Split('_');
 
                 if (ghostExpanded[0].Equals(foundExpanded[0]))
                 {
-                    m_CurrentActiveBuildGhost.transform.SetPositionAndRotation(foundObject.transform.position, foundObject.transform.rotation);
+                    m_Ghosts[0].transform.SetPositionAndRotation(foundObject.transform.position, foundObject.transform.rotation);
                 }
             }
             else
@@ -144,14 +152,14 @@ public class BuilderManager : NetworkBehaviour
     {
         PosAndRotData newData = new();
 
-        newData._xPos = m_CurrentActiveBuildGhost.transform.position.x;
-        newData._yPos = m_CurrentActiveBuildGhost.transform.position.y;
-        newData._zPos = m_CurrentActiveBuildGhost.transform.position.z;
+        newData._xPos = m_Ghosts[m_CurrentGhostInt].transform.position.x;
+        newData._yPos = m_Ghosts[m_CurrentGhostInt].transform.position.y;
+        newData._zPos = m_Ghosts[m_CurrentGhostInt].transform.position.z;
 
-        newData._xRot = m_CurrentActiveBuildGhost.transform.rotation.x;
-        newData._yRot = m_CurrentActiveBuildGhost.transform.rotation.y;
-        newData._zRot = m_CurrentActiveBuildGhost.transform.rotation.z;
-        newData._wRot = m_CurrentActiveBuildGhost.transform.rotation.w;
+        newData._xRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.x;
+        newData._yRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.y;
+        newData._zRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.z;
+        newData._wRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.w;
 
         SpawnWallServerRpc(OwnerClientId, newData);
 
@@ -161,7 +169,21 @@ public class BuilderManager : NetworkBehaviour
     [ServerRpc]
     private void SpawnWallServerRpc(ulong id, PosAndRotData posAndRotData)
     {
-        Transform newWall = Instantiate(m_Wall_Plank);
+        string[] ghostExpaned = m_Ghosts[m_CurrentGhostInt].name.Split('_');
+        print("ghostExpanded: " + ghostExpaned[0] + " | " + ghostExpaned[1]);
+        Transform foundTransform = null;
+        foreach (Transform item in m_FinishedPrefabs)
+        {
+            string[] foundExpanded = item.name.Split('_');
+            print("foundExpanded: " + foundExpanded[0] + " | " + foundExpanded[1]);
+
+            if (foundExpanded[0].Equals(ghostExpaned[0]) && foundExpanded[1].Equals(ghostExpaned[1]))
+            {
+                foundTransform = item;
+            }
+        }
+
+        Transform newWall = Instantiate(foundTransform);
         newWall.GetComponent<NetworkObject>().SpawnWithOwnership(id, true);
 
         Vector3 newPos = new(posAndRotData._xPos, posAndRotData._yPos, posAndRotData._zPos);

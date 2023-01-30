@@ -336,12 +336,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BuildModeOn: 1
   m_CurrentActiveBuildGhost: {fileID: 0}
-  m_CurrentGhost: 0
+  m_CurrentGhostInt: 0
   m_Ghosts: []
   m_GhostPrefabs:
   - {fileID: 8389645333433357985, guid: cf8fb2e3bb81bc041a43d950595f7f96, type: 3}
   - {fileID: 4758233965256762276, guid: 6a8887f9a5bb5f349bd0a4224a4faff1, type: 3}
   m_PlayerCam: {fileID: 3985414920639058144}
+  m_FinishedPrefabs:
+  - {fileID: 3074712617048785836, guid: cfe55092498060043b2f57524add8b8c, type: 3}
+  - {fileID: 4447417419890679672, guid: 3a663ede240bd054e894bfe1ab2afc41, type: 3}
   m_Wall_Plank: {fileID: 4447417419890679672, guid: 3a663ede240bd054e894bfe1ab2afc41, type: 3}
 --- !u!114 &4755391953427763457
 MonoBehaviour:
