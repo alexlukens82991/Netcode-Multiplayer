@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PlayerItemSpawner : NetworkBehaviour
 {
-    [SerializeField] private Transform m_Parent;
+    [SerializeField] private Transform m_SpawnPoint;
     [SerializeField] private Transform m_Sights;
     private void Update()
     {
@@ -15,14 +15,10 @@ public class PlayerItemSpawner : NetworkBehaviour
         {
             SpawnItemData spawnItemData = new();
 
-            spawnItemData.SetPosition(transform.position);
+            spawnItemData.SetPosition(m_SpawnPoint.position);
             spawnItemData.SetRotation(transform.rotation);
 
-            Vector3 veloDir = (m_Sights.position - m_Parent.position).normalized;
-
-            print("Sights position: " + m_Sights.position);
-            print("m_Parent position: " + m_Parent.position);
-            print("Velocity: " + veloDir);
+            Vector3 veloDir = (m_Sights.position - m_SpawnPoint.position).normalized;
 
             veloDir *= 10;
 
