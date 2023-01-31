@@ -4,10 +4,13 @@ using UnityEngine;
 using LukensUtils;
 using Unity.Netcode;
 using Unity.Netcode.Components;
+using SunTemple;
 
 public class BuilderManager : NetworkBehaviour
 {
     public bool BuildModeOn;
+    public NetworkTransform NetworkTransform;
+    public Vector3 StartPosition;
 
     public NetworkObject m_CurrentActiveBuildGhost;
     public int m_CurrentGhostInt;
@@ -25,6 +28,8 @@ public class BuilderManager : NetworkBehaviour
     {
         if (!IsOwner) return;
 
+        NetworkTransform.SetState(StartPosition);
+
         Initialize();
 
         StartCoroutine(RaycastRoutine());
@@ -32,6 +37,13 @@ public class BuilderManager : NetworkBehaviour
 
     private void Initialize()
     {
+        Door[] doors = FindObjectsOfType<Door>();
+
+        foreach (Door door in doors)
+        {
+            door.SetDoorPlayer(gameObject, m_PlayerCam);
+        }
+
         IntializeServerRpc(OwnerClientId);
     }
 
@@ -57,17 +69,10 @@ public class BuilderManager : NetworkBehaviour
     [ClientRpc]
     public void SaveSpawnedRefsClientRpc(ulong[] spawnedObjects, ulong id)
     {
-        print("Spawned Objects:");
         m_Ghosts.Clear();
-
-        foreach (var item in NetworkManager.Singleton.SpawnManager.SpawnedObjects)
-        {
-            print(item.Key + " | " + item.Value);
-        }
 
         foreach (ulong item in spawnedObjects)
         {
-            print(item);
             try
             {
                 NetworkObject foundObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[item];
@@ -162,10 +167,6 @@ public class BuilderManager : NetworkBehaviour
         newData._zRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.z;
         newData._wRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.w;
 
-        print(newData._xPos);
-        print(newData._yPos);
-        print(newData._zPos);
-
         SpawnWallServerRpc(OwnerClientId, newData);
 
     }
@@ -175,12 +176,10 @@ public class BuilderManager : NetworkBehaviour
     private void SpawnWallServerRpc(ulong id, PosAndRotData posAndRotData)
     {
         string[] ghostExpaned = m_Ghosts[m_CurrentGhostInt].name.Split('_');
-        print("ghostExpanded: " + ghostExpaned[0] + " | " + ghostExpaned[1]);
         Transform foundTransform = null;
         foreach (Transform item in m_FinishedPrefabs)
         {
             string[] foundExpanded = item.name.Split('_');
-            print("foundExpanded: " + foundExpanded[0] + " | " + foundExpanded[1]);
 
             if (foundExpanded[0].Equals(ghostExpaned[0]) && foundExpanded[1].Equals(ghostExpaned[1]))
             {
