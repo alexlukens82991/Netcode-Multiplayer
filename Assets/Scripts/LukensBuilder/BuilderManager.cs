@@ -13,10 +13,12 @@ public class BuilderManager : NetworkBehaviour
     public Vector3 StartPosition;
 
     public NetworkObject m_CurrentActiveBuildGhost;
-    public int m_CurrentGhostInt;
-    public List<NetworkObject> m_Ghosts;
+    public List<Transform> m_Ghosts;
     public List<Transform> m_GhostPrefabs;
+    private Dictionary<Transform, NetworkAnimator> m_GhostAnimatorsDictionary = new();
 
+    public NetworkVariable<int> m_CurrentGhostInt = new NetworkVariable<int>(default,
+        NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     [SerializeField] private Camera m_PlayerCam;
 
@@ -37,6 +39,7 @@ public class BuilderManager : NetworkBehaviour
 
     private void Initialize()
     {
+        print("Local intialize");
         Door[] doors = FindObjectsOfType<Door>();
 
         foreach (Door door in doors)
@@ -51,7 +54,17 @@ public class BuilderManager : NetworkBehaviour
     private void IntializeServerRpc(ulong id)
     {
         print("intialize server rpc");
+
+        ClientRpcParams clientRpcParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { id }
+            }
+        };
+
         List<ulong> spawned = new();
+
         foreach (Transform item in m_GhostPrefabs)
         {
             Transform newObj = Instantiate(item);
@@ -62,52 +75,36 @@ public class BuilderManager : NetworkBehaviour
             spawned.Add(newNetworkObj.NetworkObjectId);
         }
 
+        // call this here because clientRpc wont call it if this is server
+        if (IsServer)
+        {
+            InitializeGhostList(spawned.ToArray(), clientRpcParams);
+        }
 
-        SaveSpawnedRefsClientRpc(spawned.ToArray(), id);
+        UpdateClientInitializedClientRpc(spawned.ToArray(), clientRpcParams);
     }
 
     [ClientRpc]
-    public void SaveSpawnedRefsClientRpc(ulong[] spawnedObjects, ulong id)
+    private void UpdateClientInitializedClientRpc(ulong[] ghostTiles, ClientRpcParams clientRpcParams)
     {
+        if (IsServer) return;
+        InitializeGhostList(ghostTiles, clientRpcParams);
+    }
+
+    private void InitializeGhostList(ulong[] ghostTiles, ClientRpcParams clientRpcParams)
+    {
+        print("INITIALIZED");
         m_Ghosts.Clear();
 
-        foreach (ulong item in spawnedObjects)
+        foreach (ulong item in ghostTiles)
         {
-            try
-            {
-                NetworkObject foundObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[item];
-                m_Ghosts.Add(foundObj);
-            }
-            catch
-            {
-                Debug.LogError("yep");
-            }
+            NetworkObject foundObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[item];
+            m_Ghosts.Add(foundObj.transform);
+            NetworkAnimator foundAnimator = foundObj.GetComponent<NetworkAnimator>();
+            m_GhostAnimatorsDictionary.Add(foundObj.transform, foundAnimator);
         }
-
-
-        //List<NetworkObject> foundObjs = new();
-        //print("Saving spawned refs");
-        //foreach (ulong item in spawnedObjects)
-        //{
-        //    NetworkObject foundObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[item];
-
-        //    if (foundObj)
-        //    {
-        //        print("FOUND OBJECT!");
-        //    }
-        //    else
-        //    {
-        //        print("DID NOT FIND OBJECT");
-        //    }
-
-
-        //    foundObjs.Add(foundObj);
-        //}
-
-        //NetworkClient foundClient = NetworkManager.Singleton.ConnectedClients[id];
-
-        //foundClient.PlayerObject.GetComponent<BuilderManager>().m_Ghosts = foundObjs;
     }
+
 
     private void Update()
     {
@@ -121,7 +118,40 @@ public class BuilderManager : NetworkBehaviour
         if (Input.GetMouseButtonDown(1))
         {
             //toggle
+            ToggleCurrentGhostInt();
         }
+    }
+
+    private bool toggleCooled = true;
+
+    private void ToggleCurrentGhostInt()
+    {
+        if (!IsOwner || !toggleCooled) return;
+
+        print("FIRED");
+        toggleCooled = false;
+        m_CurrentGhostInt.Value++;
+
+        if (m_CurrentGhostInt.Value == m_Ghosts.Count)
+        {
+            m_CurrentGhostInt.Value = 0;
+        }
+        foreach (KeyValuePair<Transform, NetworkAnimator> ghostRef in m_GhostAnimatorsDictionary)
+        {
+            if (ghostRef.Key.Equals(m_Ghosts[m_CurrentGhostInt.Value]))
+            {
+                ghostRef.Value.ResetTrigger("Disable");
+                ghostRef.Value.SetTrigger("Enable");
+            }
+            else
+            {
+                ghostRef.Value.ResetTrigger("Enable");
+                ghostRef.Value.SetTrigger("Disable");
+            }
+        }
+
+        LukensUtilities.DelayedFire(() => toggleCooled = true, 1);
+
     }
 
     IEnumerator RaycastRoutine()
@@ -138,12 +168,12 @@ public class BuilderManager : NetworkBehaviour
                 //m_CurrentActiveBuildGhost.GetComponent<NetworkObject>().;
 
 
-                string[] ghostExpanded = m_Ghosts[m_CurrentGhostInt].name.Split('_');
+                string[] ghostExpanded = m_Ghosts[m_CurrentGhostInt.Value].name.Split('_');
                 string[] foundExpanded = foundObject.name.Split('_');
 
                 if (ghostExpanded[0].Equals(foundExpanded[0]))
                 {
-                    m_Ghosts[0].transform.SetPositionAndRotation(foundObject.transform.position, foundObject.transform.rotation);
+                    m_Ghosts[m_CurrentGhostInt.Value].transform.SetPositionAndRotation(foundObject.transform.position, foundObject.transform.rotation);
                 }
             }
             else
@@ -156,16 +186,19 @@ public class BuilderManager : NetworkBehaviour
 
     private void SpawnWall()
     {
+        if (m_Ghosts.Count == 0) return;
+
         PosAndRotData newData = new();
+        int currGhost = m_CurrentGhostInt.Value;
 
-        newData._xPos = m_Ghosts[m_CurrentGhostInt].transform.position.x;
-        newData._yPos = m_Ghosts[m_CurrentGhostInt].transform.position.y;
-        newData._zPos = m_Ghosts[m_CurrentGhostInt].transform.position.z;
+        newData._xPos = m_Ghosts[currGhost].position.x;
+        newData._yPos = m_Ghosts[currGhost].position.y;
+        newData._zPos = m_Ghosts[currGhost].position.z;
 
-        newData._xRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.x;
-        newData._yRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.y;
-        newData._zRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.z;
-        newData._wRot = m_Ghosts[m_CurrentGhostInt].transform.rotation.w;
+        newData._xRot = m_Ghosts[currGhost].rotation.x;
+        newData._yRot = m_Ghosts[currGhost].rotation.y;
+        newData._zRot = m_Ghosts[currGhost].rotation.z;
+        newData._wRot = m_Ghosts[currGhost].rotation.w;
 
         SpawnWallServerRpc(OwnerClientId, newData);
 
@@ -175,7 +208,12 @@ public class BuilderManager : NetworkBehaviour
     [ServerRpc]
     private void SpawnWallServerRpc(ulong id, PosAndRotData posAndRotData)
     {
-        string[] ghostExpaned = m_Ghosts[m_CurrentGhostInt].name.Split('_');
+        if (m_Ghosts.Count == 0)
+        {
+            Debug.LogWarning("GHOSTS NOT INTIALIZED. ", gameObject);
+        }
+
+        string[] ghostExpaned = m_Ghosts[m_CurrentGhostInt.Value].name.Split('_');
         Transform foundTransform = null;
         foreach (Transform item in m_FinishedPrefabs)
         {
