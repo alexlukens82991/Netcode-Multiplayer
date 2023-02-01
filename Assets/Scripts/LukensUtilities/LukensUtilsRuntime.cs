@@ -16,7 +16,8 @@ namespace LukensUtils
         {
             yield return new WaitForSeconds(time);
 
-            action.Invoke();
+            if (action.Target != null)
+                action.Invoke();
         }
         
         public GameObject WorldSpaceMouseRaycast(float distance = 100, Camera cam = null)

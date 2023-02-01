@@ -19045,6 +19045,7 @@ GameObject:
   - component: {fileID: 82177986488765500}
   - component: {fileID: 555329289971189037}
   - component: {fileID: 7520208195831557295}
+  - component: {fileID: 4326716235144487453}
   m_Layer: 0
   m_Name: Rocket 3
   m_TagString: Untagged
@@ -19252,6 +19253,19 @@ MonoBehaviour:
   ScaleThreshold: 0.01
   InLocalSpace: 0
   Interpolate: 1
+--- !u!114 &4326716235144487453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114586820754678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d313a74dfd340bf44b4bf96e1e254a0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeTillDeath: 10
 --- !u!1 &1135836398956004
 GameObject:
   m_ObjectHideFlags: 0

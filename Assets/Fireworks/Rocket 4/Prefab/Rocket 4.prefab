@@ -37868,6 +37868,7 @@ GameObject:
   - component: {fileID: 82026818448535542}
   - component: {fileID: -1224310100317847229}
   - component: {fileID: 6533625450572029457}
+  - component: {fileID: -7774934825737865304}
   m_Layer: 0
   m_Name: Rocket 4
   m_TagString: Untagged
@@ -38067,14 +38068,27 @@ MonoBehaviour:
   SyncRotAngleX: 1
   SyncRotAngleY: 1
   SyncRotAngleZ: 1
-  SyncScaleX: 1
-  SyncScaleY: 1
-  SyncScaleZ: 1
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
   PositionThreshold: 0.001
   RotAngleThreshold: 0.01
   ScaleThreshold: 0.01
   InLocalSpace: 0
   Interpolate: 1
+--- !u!114 &-7774934825737865304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1513864311348878}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d313a74dfd340bf44b4bf96e1e254a0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeTillDeath: 10
 --- !u!1 &1673957015377684
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 82511275328257930}
   - component: {fileID: -7980982365192212880}
   - component: {fileID: -5917937820494223432}
+  - component: {fileID: -5619340496166945912}
   m_Layer: 0
   m_Name: Rocket 1
   m_TagString: Untagged
@@ -222,6 +223,19 @@ MonoBehaviour:
   ScaleThreshold: 0.01
   InLocalSpace: 0
   Interpolate: 1
+--- !u!114 &-5619340496166945912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1132036261060192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d313a74dfd340bf44b4bf96e1e254a0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeTillDeath: 10
 --- !u!1 &1164075899802910
 GameObject:
   m_ObjectHideFlags: 0
@@ -280,7 +294,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -5120,7 +5134,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -9877,7 +9891,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -14634,7 +14648,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -19391,7 +19405,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -28923,7 +28937,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -33680,7 +33694,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -38437,7 +38451,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -43194,7 +43208,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -47951,7 +47965,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -52708,7 +52722,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -57474,7 +57488,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
@@ -62231,7 +62245,7 @@ ParticleSystem:
   startDelay:
     serializedVersion: 2
     minMaxState: 0
-    scalar: 3
+    scalar: 1.5
     minScalar: 0
     maxCurve:
       serializedVersion: 2
