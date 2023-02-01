@@ -30,13 +30,13 @@ public class NetworkSpawner : NetworkBehaviour
         NetworkObject foundObj = newItem.GetComponent<NetworkObject>();
         foundObj.Spawn();
 
-        Rigidbody foundRb = newItem.GetComponent<Rigidbody>();
+        if (spawnItemData._hasVelocity)
+        {
+            Rigidbody foundRb = newItem.GetComponent<Rigidbody>();
 
-        foundRb.AddForce(spawnItemData.GetVelocity(), ForceMode.Impulse);
-
+            foundRb.AddForce(spawnItemData.GetVelocity(), ForceMode.Impulse);
+        }
     }
-
-    
 }
 
 public struct SpawnItemData : INetworkSerializable
@@ -54,6 +54,8 @@ public struct SpawnItemData : INetworkSerializable
     public float _veloY;
     public float _veloZ;
 
+    public bool _hasVelocity;
+
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref _xPos);
@@ -68,6 +70,8 @@ public struct SpawnItemData : INetworkSerializable
         serializer.SerializeValue(ref _veloX);
         serializer.SerializeValue(ref _veloY);
         serializer.SerializeValue(ref _veloZ);
+
+        serializer.SerializeValue(ref _hasVelocity);
     }
 
     public void SetPosition(Vector3 pos)
